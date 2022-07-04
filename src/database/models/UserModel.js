@@ -1,25 +1,41 @@
 const db = require('../config//connection');
 
-export const login = async (email) => {
-  return await db.execute('SELECT * FROM users WHERE email = ?', [email])
+const userLoginModel = async (email) => {
+  const [result] = await db.execute('SELECT * FROM users WHERE email = ?', [email])
+  
+  return result
 }
 
-export const getAll = async () => {
-  return await db.execute('SELECT * FROM users')
+const userGetAllModel = async () => {
+  const [result] = await db.execute('SELECT * FROM users')
+  return result;
 }
 
-export const getOne = async (email) => {
-  return await db.execute('SELECT * FROM users WHERE email = ?', [email])
+const userGetOneModel = async (email) => {
+  const [result] = await db.execute('SELECT * FROM users WHERE email = ?', [email])
+  return result;
 }
 
-export const cadastrar = async (email, password) => {
-  return await db.execute('INSERT INTO users (email, password) VALUES (?,?)', [email, password])
+const userCadastrarModel = async (email, password) => {
+  const [result] = await db.execute('INSERT INTO users (email, password) VALUES (?,?)', [email, password])
+  return result;
 }
 
-export const updateOnePassword = async (email, password) => {
-  return await db.execute('UPDATE users SET password = ? WHERE email = ?', [password, email])
+const userUpdateOnePasswordModel = async (email, password) => {
+  const [result] = await db.execute('UPDATE users SET password = ? WHERE email = ?', [password, email])
+  return result;
 }
 
-export const deleteUser = async (email) => {
-  return await db.execute('DELETE FROM users WHERE email - ?', [email])
+const userDeleteUserModel = async (email) => {
+  const [result] = await db.execute('DELETE FROM users WHERE email - ?', [email])
+  return result;
+}
+
+module.exports = {
+  userLoginModel,
+  userGetAllModel,
+  userGetOneModel,
+  userCadastrarModel,
+  userUpdateOnePasswordModel,
+  userDeleteUserModel
 }

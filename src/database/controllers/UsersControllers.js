@@ -1,29 +1,47 @@
-import { login, cadastrar, deleteUser, getAll, getOne, updateOnePassword } from '../services/UsersServices'
+const { userLoginServices, cadastrar, deleteUser, userGetAllServices , UserGetOneServices, updateOnePassword } = require('../services/UsersServices')
 
-export const login = async (req, res) => {
+ const userLoginControllers = async (req, res) => {
     const { email, password } = req.body
-    const user = await login(email, password);
+    const user = await userLoginServices(email, password);
     if (user instanceof Error) {
-        return res.status(400).json({ returned: false ,message: user.message })
+        return res.status(400).json({ token: false ,message: user.message })
     }
+
+    res.status(200).json(user);
 }
 
-export const getAll = async () => {
-  return await db.execute('SELECT * FROM users')
+ const userGetAllControllers = async (req, res) => {
+    const user = await userGetAllServices();
+    if (user instanceof Error) {
+        return res.status(400).json({ token: false ,message: user.message })
+    }
+
+    res.status(200).json(user);
 }
 
-export const getOne = async (email) => {
-  return await db.execute('SELECT * FROM users WHERE email = ?', [email])
+ const getOne = async (req, res) => {
+    const { email, password } = req.body
+    const user = await userLoginServices(email, password);
+    if (user instanceof Error) {
+        return res.status(400).json({ token: false ,message: user.message })
+    }
+
+    res.status(200).json(user);
 }
 
-export const cadastrar = async (email, password) => {
+ const userCadastrarControllers = async (req, res) => {
   return await db.execute('INSERT INTO users (email, password) VALUES (?,?)', [email, password])
 }
 
-export const updateOnePassword = async (email, password) => {
+ const userUpdateOnePasswordControllers = async (req, res) => {
   return await db.execute('UPDATE users SET password = ? WHERE email = ?', [password, email])
 }
 
-export const deleteUser = async (email) => {
+ const userDeleteUserControllers = async (req, res) => {
   return await db.execute('DELETE FROM users WHERE email - ?', [email])
+}
+
+module.exports = {
+    userLoginControllers,
+    userGetAllControllers,
 }
