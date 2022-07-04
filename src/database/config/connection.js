@@ -8,4 +8,4 @@ const connection = mysql.createPool({
     host: 'localhost'
 })
 
-module.exports = connection;
+module.exports = connection

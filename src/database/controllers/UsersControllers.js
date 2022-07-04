@@ -1,7 +1,11 @@
-const db = require('../config//connection');
+import { login, cadastrar, deleteUser, getAll, getOne, updateOnePassword } from '../services/UsersServices'
 
-export const login = async (email) => {
-  return await db.execute('SELECT * FROM users WHERE email = ?', [email])
+export const login = async (req, res) => {
+    const { email, password } = req.body
+    const user = await login(email, password);
+    if (user instanceof Error) {
+        return res.status(400).json({ returned: false ,message: user.message })
+    }
 }
 
 export const getAll = async () => {

@@ -1,7 +1,17 @@
-const db = require('../config//connection');
+import { login, cadastrar, deleteUser, getAll, getOne, updateOnePassword } from "../models/UserModel"
+import { authCryto, decodedCrypto } from '../helpers/crypt'
 
-export const login = async (email) => {
-  return await db.execute('SELECT * FROM users WHERE email = ?', [email])
+export const login = async (email, password) => {
+  const user = await login(email)
+  if (!user) {
+    return new Error('Email ou senha está incorreto')
+  }
+  const verifyPass = decodedCrypto(password, user.password);
+  if (!verifyPass) {
+    return new Error('Email ou senha está incorreto')
+  }
+
+  return user;
 }
 
 export const getAll = async () => {
