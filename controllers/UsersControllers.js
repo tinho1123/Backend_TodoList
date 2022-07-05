@@ -49,8 +49,9 @@ const userGetOneControllers = async (req, res) => {
 
  const userUpdateOnePasswordControllers = async (req, res) => {
   const { email, lastPassword, newPassword } = req.body;
+  const user = req.user
 
-  const result = await userUpdateOnePasswordServices(email, lastPassword, newPassword)
+  const result = await userUpdateOnePasswordServices(user, email, lastPassword, newPassword)
 
   if (result instanceof Error) {
     return res.status(400).json({ messsage: result.message})
@@ -61,13 +62,9 @@ const userGetOneControllers = async (req, res) => {
 
 const userUpdateOneEmailControllers = async (req, res) => {
   const { email, password } = req.body;
-  const { token } = req.header;
+  const user = req.user
 
-  if (!token) {
-    return res.status(400).json({ message: 'Token não passado'})
-  }
-
-  const result = await userUpdateOneEmailControllers(token, email, password)
+  const result = await userUpdateOneEmailControllers(user, email, password)
 
   if (result instanceof Error) {
     return res.status(400).json({ messsage: result.message})
@@ -78,8 +75,9 @@ const userUpdateOneEmailControllers = async (req, res) => {
 
  const userDeleteUserControllers = async (req, res) => {
   const { email, password, confirmPassword } = req.body;
+  const user = req.user
 
-  const result = await userDeleteUserServices(email, password, confirmPassword)
+  const result = await userDeleteUserServices(user, email, password, confirmPassword)
   
   if (result instanceof Error) {
     return res.status(400).json({ messsage: result.message})
