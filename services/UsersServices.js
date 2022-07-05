@@ -36,13 +36,13 @@ const userLoginServices = async (email, password) => {
 }
 
 const userCadastrarServices = async (email, password) => {
-  const user = await User.findAll({
+  const user = await User.findOne({
     where: {
       email
     }
   })
 
-  if (user.length > 1) {
+  if (user) {
     return new Error('Usuário já existe')
   }
 
@@ -75,29 +75,107 @@ const userGetAllServices = async () => {
 }
 
 const userGetOneServices = async (email) => {
-  const user = await login(email)
+  const user = await User.findOne({ where: { email }, include: [{
+    model: TodoList,
+    as: 'todoListName',
+    include: [{
+      model: TypeCard,
+      include: [{
+        model: Card,
+        as: 'cardName'
+      }],
+    }],
+    
+  }]});
+
   if (!user) {
-    return new Error('Email ou senha está incorreto')
-  }
-  const verifyPass = decodedCrypto(password, user.password);
-  if (!verifyPass) {
-    return new Error('Email ou senha está incorreto')
+    return new Error('Usuário inexistente')
   }
 
-  const token = createToken(user)
+  return user
+  
+}
+
+const userUpdateOnePasswordServices = async (email, lastPassword, newPassword) => {
+  const user = await User.findOne({ where: { email } });
+  
+  if (!user) {
+    return new Error('Email incorreto')
+  }
+
+  const verifyPass = decodedCrypto(lastPassword, user.password);
+
+  if (!verifyPass) {
+    return new Error('Impossível alterar pois a senha anterior está incorreta')
+  }
+
+  const hashPass = authCrypto(newPassword)
+
+  const userUpdated = await User.update(
+    {
+    password: hashPass
+  }, {
+    where: { email }
+  })
 
   return {
-    token,
-    user
-  };
+    updated: true,
+  }
 }
 
-const userUpdateOnePasswordServices = async (email, password) => {
-  return await db.execute('UPDATE users SET password = ? WHERE email = ?', [password, email])
+const userUpdateOneEmailServices = async (token, email, password) => {
+  const tokenVerify = verifyToken(token)
+
+  const user = await User.findOne({ where: { email: tokenVerify.email } });
+  
+  if (!user) {
+    return new Error('Email inexistente')
+  }
+
+  const verifyPass = decodedCrypto(password, user.password);
+
+  if (!verifyPass) {
+    return new Error('Impossível alterar pois a senha está incorreta')
+  }
+
+  const userUpdated = await User.update(
+    {
+    email
+  }, {
+    where: { email: token.email }
+  })
+
+  return {
+    updated: true,
+    userUpdated
+  }
 }
 
-const userDeleteUserServices = async (email) => {
-  return await db.execute('DELETE FROM users WHERE email - ?', [email])
+const userDeleteUserServices = async (email, password, confirmPassword) => {
+  const user = await User.findOne({ where: { email } });
+  
+  if (!user) {
+    return new Error('Email incorreto')
+  }
+
+  if (password !== confirmPassword) {
+    return new Error('A senha e a confirmação de senha são diferentes')
+  }
+
+  const verifyPass = decodedCrypto(password, user.password);
+
+  if (!verifyPass) {
+    return new Error('Impossível deletar pois a senha está incorreta')
+  }
+
+  await User.destroy(
+    {
+      where: { email }
+    })
+
+  return {
+    deleted: true,
+  }
 }
 
 module.exports = {
@@ -105,6 +183,7 @@ module.exports = {
     userDeleteUserServices,
     userCadastrarServices,
     userUpdateOnePasswordServices,
+    userUpdateOneEmailServices,
     userGetOneServices,
     userLoginServices
 
