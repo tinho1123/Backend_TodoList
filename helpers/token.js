@@ -5,12 +5,7 @@ const createToken = (body) => {
     return token
 }
 
-const verifyToken = (body) => {
-    const verify = json.verify(body, process.env.KEY_JWT)
-    return verify;
-}
-
 module.exports = {
     createToken,
-    verifyToken,
+    
 }
