@@ -1,9 +1,22 @@
-const { userGetAllModel, userGetOneModel, userLoginModel } = require("../models/UserModel")
 const { authCryto, decodedCrypto } = require('../helpers/crypt')
-const { createToken } = require('../helpers/token')
+const { createToken } = require('../helpers/token');
+const { User,  TodoList, TypeCard, Card } = require('../models');
+
 
 const userLoginServices = async (email, password) => {
-  const user = await userLoginModel(email)
+  const user = await User.findOne({ where: { email }, include: [{
+    model: TodoList,
+    as: 'todoListName',
+    include: [{
+      model: TypeCard,
+      include: [{
+        model: Card,
+        as: 'cardName'
+      }],
+    }],
+    
+  }]});
+  
   if (!user) {
     return new Error('Email ou senha está incorreto')
   }
@@ -12,7 +25,7 @@ const userLoginServices = async (email, password) => {
     return new Error('Email ou senha está incorreto')
   }
 
-  const token = createToken(user)
+  const token = createToken(user.email)
 
   return {
     token,
@@ -21,7 +34,7 @@ const userLoginServices = async (email, password) => {
 }
 
 const userGetAllServices = async () => {
-    const user = await userGetAllModel()
+    const user = await User.findAll()
     if (!user) {
       return new Error('Nenhum usuário encontrado')
     }
@@ -48,7 +61,28 @@ const userGetOneServices = async (email) => {
 }
 
 const userCadastrarServices = async (email, password) => {
-  return await db.execute('INSERT INTO users (email, password) VALUES (?,?)', [email, password])
+  const user = await User.findAll({
+    where: {
+      email
+    }
+  })
+
+  if (user) {
+    return new Error('Usuário já existe')
+  }
+
+  const verifyPass = decodedCrypto(password, user.password);
+  if (!verifyPass) {
+    return new Error('Email ou senha está incorreto')
+  }
+
+  const token = createToken(user)
+
+  return {
+    token,
+    user
+  };
+  
 }
 
 const userUpdateOnePasswordServices = async (email, password) => {
