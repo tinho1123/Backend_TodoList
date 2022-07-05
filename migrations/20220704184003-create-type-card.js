@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('TodoLists', {
+    await queryInterface.createTable('TypeCards', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -11,18 +11,17 @@ module.exports = {
       
       title: {
         type: Sequelize.STRING
-      },
-      
-
-      idUser: {
+      },  
+      idTodoList: {
         type: Sequelize.INTEGER,
         allowNull: true,
         references: {
-          model: 'Users',
+          model: 'TodoLists',
           key: 'id'
         },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
       },
-
 
       createdAt: {
         allowNull: false,
@@ -36,6 +35,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('TodoLists');
+    await queryInterface.dropTable('TypeCards');
   }
 };

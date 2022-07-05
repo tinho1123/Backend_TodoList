@@ -1,10 +1,10 @@
-const { userLoginServices, cadastrar, deleteUser, userGetAllServices , UserGetOneServices, updateOnePassword } = require('../services/UsersServices')
+const { userLoginServices, cadastrar, deleteUser, userGetAllServices , UserGetOneServices, updateOnePassword, userCadastrarServices } = require('../services/UsersServices')
 
  const userLoginControllers = async (req, res) => {
     const { email, password } = req.body
     const user = await userLoginServices(email, password);
     if (user instanceof Error) {
-        return res.status(400).json({ token: false ,message: user.message })
+        return res.status(400).json({ message: user.message })
     }
 
     res.status(200).json(user);
@@ -13,24 +13,30 @@ const { userLoginServices, cadastrar, deleteUser, userGetAllServices , UserGetOn
  const userGetAllControllers = async (req, res) => {
     const user = await userGetAllServices();
     if (user instanceof Error) {
-        return res.status(400).json({ token: false ,message: user.message })
+        return res.status(400).json({ message: user.message })
     }
 
     res.status(200).json(user);
 }
 
- const getOne = async (req, res) => {
+ const userGetOneControllers = async (req, res) => {
     const { email, password } = req.body
     const user = await userLoginServices(email, password);
     if (user instanceof Error) {
-        return res.status(400).json({ token: false ,message: user.message })
+        return res.status(400).json({ message: user.message })
     }
 
     res.status(200).json(user);
 }
 
  const userCadastrarControllers = async (req, res) => {
-  return await db.execute('INSERT INTO users (email, password) VALUES (?,?)', [email, password])
+  const { email, password } = req.body;
+  const result = await userCadastrarServices(email, password)
+  if (result instanceof Error) {
+    return res.status(400).json({ messsage: result.message})
+  }
+
+  res.status(200).json(result)
 }
 
  const userUpdateOnePasswordControllers = async (req, res) => {
@@ -43,5 +49,9 @@ const { userLoginServices, cadastrar, deleteUser, userGetAllServices , UserGetOn
 
 module.exports = {
     userLoginControllers,
+    userCadastrarControllers,
     userGetAllControllers,
+    userGetOneControllers,
+    userUpdateOnePasswordControllers,
+    userDeleteUserControllers
 }

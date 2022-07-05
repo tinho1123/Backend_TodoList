@@ -27,6 +27,8 @@ module.exports = {
           model: 'TypeCards',
           key: 'id'
         },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
       },
       
       createdAt: {

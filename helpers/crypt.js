@@ -1,14 +1,16 @@
 const crypto = require('bcryptjs');
 
-const authCryto = async (password) => {
-    return await  crypto.hash(password, process.env.KEY_BCRYPTJS)
+const authCrypto = (password) => {
+    const createCrypt = crypto.hashSync(password)
+    return createCrypt;
 }
 
-const decodedCrypto = async (password, hash) => {
-    return await crypto.compareSync(password, hash)
+const decodedCrypto = (password, hash) => {
+    const verifyCrypt =  crypto.compareSync(password, hash)
+    return verifyCrypt
 }
 
 module.exports = {
-    authCryto,
+    authCrypto,
     decodedCrypto
 }

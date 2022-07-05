@@ -1,5 +1,5 @@
-const { authCryto, decodedCrypto } = require('../helpers/crypt')
-const { createToken } = require('../helpers/token');
+const { authCrypto, decodedCrypto } = require('../helpers/crypt')
+const { createToken, verifyToken } = require('../helpers/token');
 const { User,  TodoList, TypeCard, Card } = require('../models');
 
 
@@ -20,44 +20,19 @@ const userLoginServices = async (email, password) => {
   if (!user) {
     return new Error('Email ou senha está incorreto')
   }
+
   const verifyPass = decodedCrypto(password, user.password);
+
   if (!verifyPass) {
     return new Error('Email ou senha está incorreto')
   }
 
-  const token = createToken(user.email)
+  const token = createToken({ email: user.email, password: user.password });
 
   return {
     token,
     user
   };
-}
-
-const userGetAllServices = async () => {
-    const user = await User.findAll()
-    if (!user) {
-      return new Error('Nenhum usuário encontrado')
-    }
-  
-    return user
-}
-
-const userGetOneServices = async (email) => {
-    const user = await login(email)
-    if (!user) {
-      return new Error('Email ou senha está incorreto')
-    }
-    const verifyPass = decodedCrypto(password, user.password);
-    if (!verifyPass) {
-      return new Error('Email ou senha está incorreto')
-    }
-  
-    const token = createToken(user)
-  
-    return {
-      token,
-      user
-    };
 }
 
 const userCadastrarServices = async (email, password) => {
@@ -67,10 +42,43 @@ const userCadastrarServices = async (email, password) => {
     }
   })
 
-  if (user) {
+  if (user.length > 1) {
     return new Error('Usuário já existe')
   }
 
+  const cryptoPass = authCrypto(password)
+
+  if (!cryptoPass) {
+    return new Error('Houve um erro ao criar a conta, tente novamente')
+  }
+
+  await User.create({
+    email: email,
+    password: cryptoPass
+  })
+
+
+  return {
+    created: true,
+
+  };
+  
+}
+
+const userGetAllServices = async () => {
+  const user = await User.findAll()
+  if (!user) {
+    return new Error('Nenhum usuário encontrado')
+  }
+
+  return user
+}
+
+const userGetOneServices = async (email) => {
+  const user = await login(email)
+  if (!user) {
+    return new Error('Email ou senha está incorreto')
+  }
   const verifyPass = decodedCrypto(password, user.password);
   if (!verifyPass) {
     return new Error('Email ou senha está incorreto')
@@ -82,7 +90,6 @@ const userCadastrarServices = async (email, password) => {
     token,
     user
   };
-  
 }
 
 const userUpdateOnePasswordServices = async (email, password) => {
